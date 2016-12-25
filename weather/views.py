@@ -42,8 +42,8 @@ def homepage(request):
 	y_axis = []
 	unitscale = 'imperial'
 	place = ''
-	sdate = 'Start date'
-	edate = 'End date'
+	sdate = ''
+	edate = ''
 	parameter = 'dew'
 	if request.method == "POST":
 		cd = request.POST

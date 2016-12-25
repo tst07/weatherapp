@@ -1,0 +1,24 @@
+body {
+	background-color: #EADCC5
+}
+
+.resizable {
+	background-color: white;
+	height : 550px;
+	width:500px;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid black;
+    margin: 1em 0;
+    padding: 0; 
+}
+
+/* style the svg rect */
+.ct-zoom-rect {
+  fill: rgba(200, 100, 100, 0.3);
+  stroke: red;
+}

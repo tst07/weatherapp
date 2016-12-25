@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+
+	<div class="row">
+		<div class="col-lg-11 col-sm-11 col-md-11 col-xs-11">
+			<h2 class="">Lets plot some stats!</h2>
+		</div>
+		<div class="col-lg-1 col-sm-1 col-md-1 col-xs-1">
+			<form id="unitform">
+				<div class="radio">
+				  <label>
+				    <input type="radio" name="units" value="imperial" 
+		            {% if "imperial" in  unitscale  %}
+  						checked
+					{% endif %}>
+				     imperial
+				  </label>
+				</div>
+				<div class="radio">
+				  <label>
+				    <input type="radio" name="units" value="metric"
+		            {% if "metric" in  unitscale  %}
+  						checked
+					{% endif %}>
+				     metric
+				  </label>
+				</div>				
+			</form>
+		</div>
+	</div>
+	<hr>
+	
+
+
+	<form id="weatherform" method="POST" class="row form-inline">
+		{% csrf_token %}
+		<br>
+		<input type="hidden" name="unitscale" value="{{ unitscale }}">
+	  	<div class="col-lg-3 col-sm-3 col-md-3 col-xs-3 form-group">
+	    	<input type="text" name="place" class="form-control" id="autocomplete" placeholder="Insert a place" 
+	    	value="{{ place }}"  required>
+	 	 </div>
+
+		<div class="col-lg-2 col-sm-2 col-md-2 col-xs-2 form-group">
+	        <select class="form-control" id="params" name="parameter">
+	            <option id="dewpt" value="{% if "imperial" in  unitscale  %}dewpti{% else %}dewptm{% endif %}" 
+	            {% if "dewpt" in  parameter  %}
+  					selected
+				{% endif %}>
+	            	Dew
+	            </option>
+	            <option id="fog" value="fog"
+	            {% if "fog" in  parameter  %}
+  					selected
+				{% endif %}>
+	            	Fog
+	            </option>
+	            <option id="hail" value="hail"
+	            {% if "hail" in  parameter  %}
+  					selected
+				{% endif %}>
+	            	Hail
+	            </option>
+	            <option id="hum" value="hum"
+	            {% if "hum" in  parameter %}
+  					selected
+				{% endif %}>
+	            	Humidity
+	            </option>
+	           	<option id="pressure" 
+	           	value="{% if "imperial" in  unitscale %}pressurei{% else %}pressurem{% endif %}"
+	            {% if "pressure" in  parameter  %}
+  					selected
+				{% endif %}>
+	           		Pressure
+	           	</option>
+	           	<option id="rain" value="rain"
+	            {% if "rain" in  parameter  %}
+  					selected
+				{% endif %}>
+	           		Rain
+	           	</option>
+	           	<option id="snow" value="snow"
+	            {% if "snow" in  parameter %}
+  					selected
+				{% endif %}>
+	           		Snow
+	           	</option>
+	            <option id="temp" value="{% if "imperial" in  unitscale %}tempi{% else %}tempm{% endif %}"
+	            {% if "temp" in  parameter %}
+  					selected
+				{% endif %}>
+	            	Temperature
+	            </option>
+	            <option id="thunder" value="thunder"
+	            {% if "thunder" in parameter %}
+  					selected
+				{% endif %}>
+	            	Thunder
+	            </option>
+	            <option id="tornado" value="tornado"
+	            {% if "tornado" in parameter %}
+  					selected
+				{% endif %}>
+	            	Tornado
+	            </option>
+	            <option id="visi" value="visi"
+	            {% if "visi" in parameter %}
+  					selected
+				{% endif %}>
+	            	Visibility
+	            </option>
+	            <option id="wgust" value="{% if "imperial" in  unitscale %}wgusti{% else %}wgustm{% endif %}"
+	            {% if "wgust" in parameter %}
+  					selected
+				{% endif %}>
+	            	Wind Gust
+	            </option>
+	            <option id="wspd" value="{% if "imperial" in  unitscale %}wspdi{% else %}wspdm{% endif %}"
+	            {% if "wspd" in parameter %}
+  					selected
+				{% endif %}>
+	            	Wind Speed
+	            </option>
+	        </select>
+		</div>
+
+		<div class="col-lg-3 col-sm-3 col-md-3 col-xs-3 form-group">
+	    	<input type="text" name="start_date" class="form-control datepicker" id="startdate" placeholder="{{ sdate }}" value="{{ sdate }}" required>
+	 	</div>
+
+	 	<div class="col-lg-3 col-sm-3 col-md-3 col-xs-3 form-group">
+	    	<input type="text" name="end_date" class="form-control datepicker" id="enddate" placeholder="{{ edate }}" value="{{ edate }}" required>
+	 	</div>
+	 	<button type="submit" class="col-lg-1 col-sm-1 col-md-1 col-xs-1 btn btn-primary">Plot</button>
+	</form>	
+	<br>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title text-center"><u>Scale</u></h3>
+  </div>
+  <div class="row panel-body">
+  		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+			X-axis:<br>  1 unit = 1 hour
+		</div>
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+			Y-axis:<br> 1 unit = 1 <span id="unitscale">{{ unitscale }}</span> unit
+		</div>
+  </div>
+</div>
+
+	<div class="ct-chart ct-perfect-fourth resizable"></div>
+	<center> <button class="btn btn-primary" id="resetting">Reset Zoom</button></center>
+
+ 
+<h3>OBSERVATIONS:</h3><hr> 
+<div class="table-responsive">
+  <table class="table table-hover">
+  	<tr>
+  		<td>
+  			#
+  		</td>
+  		<td>
+  			Time (X-axis)
+  		</td>
+  		<td>
+  			Observation (Y-axis)
+  		</td>
+  	</tr>
+  	{% for a,b in z %}
+	<tr>
+		<td>
+			{{ forloop.counter }}
+		</td>
+  		<td>
+  			{{a}}
+  		</td>
+  		<td>
+  			{{b}}
+  		</td>
+	</tr>
+  	{% endfor %}
+  </table>
+</div>
+
+{% endblock %}
+
+{% block domready %}
+  	var input = document.getElementById('autocomplete');
+  	var opts = {
+	  types: ['(cities)']
+	};
+  	var autocomplete = new google.maps.places.Autocomplete(input,opts);
+
+	$(".citydropdown").select2();
+
+	$('#weatherform').submit(function(){
+		var startDt=document.getElementById("startdate").value;
+		var endDt=document.getElementById("enddate").value;
+
+		if( (new Date(startDt).getTime() > new Date(endDt).getTime()))
+		{
+			alert("Start date must be time before End date");
+		    return false;
+		}
+	});
+
+///////////////////////////////////UNIT SYSTEM/////////////////////////////////////////////
+$("input[name='units']").change(function(){
+    // Do something interesting here
+    var v =  $("input[name='units']:checked").val();
+    if(v == 'imperial'){
+    	$("#dewpt").val('dewpti');
+    	$("#pressure").val('pressurei');
+    	$("#temp").val('tempi');
+    	$("#wgust").val('wgusti');
+    	$("#wspd").val('wspdi');
+    	$("input[name='unitscale']").val('imperial');
+	} else{
+		$("#dewpt").val('dewptm');
+		$("#pressure").val('pressurem');
+		$("#temp").val('tempm');
+		$("#wgust").val('wgustm');
+		$("#wgust").val('wgusti');
+		$("#wspd").val('wspdm');
+		$("input[name='units']:checked").val();
+		$("input[name='unitscale']").val('metric');
+	}
+});
+///////////////////////////////////UNIT SYSTEM/////////////////////////////////////////////
+
+/////////////////*******************CHARTS********************/////////////////////////////
+	var x_axis = {{ x|safe }};
+	var y_axis = {{ y|safe }};
+
+	var arrayLength = y_axis.length;
+	var datalist = [];
+
+	for (var i = 0; i < arrayLength; i++) {
+		if(y_axis[i] !== '-9999')
+    		datalist.push({x : i, y : y_axis[i]});
+	}
+
+	console.log(datalist);
+
+	var data = {
+	  	series: [datalist]
+	};
+
+var options = {
+  axisX: {
+    type: Chartist.AutoScaleAxis
+  },
+  axisY: {
+    type: Chartist.AutoScaleAxis
+  },
+  plugins: [
+    Chartist.plugins.zoom({ onZoom: onZoom })
+  ]
+};
+
+var chart = Chartist.Line('.ct-chart', data, options);
+var resetFnc;
+function onZoom(chart, reset) {
+  resetFnc = reset;
+}
+
+$('#resetting').click(function(){
+  resetFnc && resetFnc();	
+});
+/////////////////*******************CHART1********************/////////////////////////////
+{% endblock %}

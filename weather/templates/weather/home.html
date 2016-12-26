@@ -39,7 +39,7 @@
 		<br>
 		<input type="hidden" name="unitscale" value="{{ unitscale }}">
 	  	<div class="col-lg-3 col-sm-3 col-md-3 col-xs-3 form-group">
-	    	<input type="text" name="place" class="form-control" id="autocomplete" placeholder="Insert a place" 
+	    	<input type="text" name="place" class="form-control" id="autocomplete" placeholder="Insert a city" 
 	    	value="{{ place }}"  required>
 	 	 </div>
 
@@ -128,14 +128,16 @@
 		</div>
 
 		<div class="col-lg-3 col-sm-3 col-md-3 col-xs-3 form-group">
-	    	<input type="text" name="start_date" class="form-control datepicker" id="startdate" placeholder="Start date" value="{{ sdate }}" required>
+	    	<input type="text" name="start_date" class="form-control datepicker" id="startdate" placeholder="Start date" value="{{ sdate }}" required>	
 	 	</div>
 
 	 	<div class="col-lg-3 col-sm-3 col-md-3 col-xs-3 form-group">
-	    	<input type="text" name="end_date" class="form-control datepicker" id="enddate" placeholder="End date" value="{{ edate }}" required>
+	    	<input type="text" name="end_date" class="form-control datepicker" id="enddate" placeholder="End date" value="{{ edate }}" required
+			data-toggle="tooltip" data-placement="bottom" title="Select 10 days or less from start date">
 	 	</div>
 	 	<button type="submit" class="col-lg-1 col-sm-1 col-md-1 col-xs-1 btn btn-primary">Plot</button>
-	</form>	
+	</form><br>
+	<div id="erroralerts"></div>
 	<br>
 
 <div class="panel panel-default">
@@ -144,7 +146,7 @@
   </div>
   <div class="row panel-body">
   		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-			X-axis:<br>  1 unit = 1 hour
+			X-axis:<br>  1 unit = {{ timeinterval }} DD:HH:MM:SS
 		</div>
 		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
 			Y-axis:<br> 1 unit = 1 <span id="unitscale">{{ unitscale }}</span> unit
@@ -153,123 +155,52 @@
 </div>
 
 	<div class="ct-chart ct-perfect-fourth resizable"></div>
-	<center> <button class="btn btn-primary" id="resetting">Reset Zoom</button></center>
+	<br>
+	<center> 
+		<button class="btn btn-primary" id="resetting">Reset Zoom</button>
+		<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Observations</button>		
+	</center>
 
- 
-<h3>OBSERVATIONS:</h3><hr> 
-<div class="table-responsive">
-  <table class="table table-hover">
-  	<tr>
-  		<td>
-  			#
-  		</td>
-  		<td>
-  			Time (X-axis)
-  		</td>
-  		<td>
-  			Observation (Y-axis)
-  		</td>
-  	</tr>
-  	{% for a,b in z %}
-	<tr>
-		<td>
-			{{ forloop.counter }}
-		</td>
-  		<td>
-  			{{a}}
-  		</td>
-  		<td>
-  			{{b}}
-  		</td>
-	</tr>
-  	{% endfor %}
-  </table>
+ <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <a id="obsv" data-dismiss="modal" href="#" style="float:right">show table on page</a>
+        <h4 class="modal-title" id="myModalLabel">Observation Table:</h4>
+      </div>
+      <div class="modal-body">
+		<div id="obsTable" class="table-responsive">
+		  <table class="table table-hover">
+		  	<tr>
+		  		<td>#</td>
+		  		<td>Time (X-axis)</td>
+		  		<td>Observation (Y-axis)</td>
+		  	</tr>
+		  	{% for a,b in z %}
+			<tr>
+				<td>{{ forloop.counter }}</td>
+		  		<td>{{a}}</td>
+		  		<td>{{b}}</td>
+			</tr>
+		  	{% endfor %}
+		  </table>
+		</div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br>
+
+<div id="obsPage" class="table-responsive">
 </div>
 
 {% endblock %}
 
 {% block domready %}
-  	var input = document.getElementById('autocomplete');
-  	var opts = {
-	  types: ['(cities)']
-	};
-  	var autocomplete = new google.maps.places.Autocomplete(input,opts);
-
-	$(".citydropdown").select2();
-
-	$('#weatherform').submit(function(){
-		var startDt=document.getElementById("startdate").value;
-		var endDt=document.getElementById("enddate").value;
-
-		if( (new Date(startDt).getTime() > new Date(endDt).getTime()))
-		{
-			alert("Start date must be time before End date");
-		    return false;
-		}
-	});
-
-///////////////////////////////////UNIT SYSTEM/////////////////////////////////////////////
-$("input[name='units']").change(function(){
-    // Do something interesting here
-    var v =  $("input[name='units']:checked").val();
-    if(v == 'imperial'){
-    	$("#dewpt").val('dewpti');
-    	$("#pressure").val('pressurei');
-    	$("#temp").val('tempi');
-    	$("#wgust").val('wgusti');
-    	$("#wspd").val('wspdi');
-    	$("input[name='unitscale']").val('imperial');
-	} else{
-		$("#dewpt").val('dewptm');
-		$("#pressure").val('pressurem');
-		$("#temp").val('tempm');
-		$("#wgust").val('wgustm');
-		$("#wgust").val('wgusti');
-		$("#wspd").val('wspdm');
-		$("input[name='units']:checked").val();
-		$("input[name='unitscale']").val('metric');
-	}
-});
-///////////////////////////////////UNIT SYSTEM/////////////////////////////////////////////
-
-/////////////////*******************CHARTS********************/////////////////////////////
-	var x_axis = {{ x|safe }};
-	var y_axis = {{ y|safe }};
-
-	var arrayLength = y_axis.length;
-	var datalist = [];
-
-	for (var i = 0; i < arrayLength; i++) {
-		if(y_axis[i] !== '-9999')
-    		datalist.push({x : i, y : y_axis[i]});
-	}
-
-	console.log(datalist);
-
-	var data = {
-	  	series: [datalist]
-	};
-
-var options = {
-  axisX: {
-    type: Chartist.AutoScaleAxis
-  },
-  axisY: {
-    type: Chartist.AutoScaleAxis
-  },
-  plugins: [
-    Chartist.plugins.zoom({ onZoom: onZoom })
-  ]
-};
-
-var chart = Chartist.Line('.ct-chart', data, options);
-var resetFnc;
-function onZoom(chart, reset) {
-  resetFnc = reset;
-}
-
-$('#resetting').click(function(){
-  resetFnc && resetFnc();	
-});
-/////////////////*******************CHART1********************/////////////////////////////
+{% include "weather/homejs.html" %}
 {% endblock %}

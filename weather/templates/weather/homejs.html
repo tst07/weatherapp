@@ -1,0 +1,107 @@
+
+  	var input = document.getElementById('autocomplete');
+  	var opts = {
+	  types: ['(cities)']
+	};
+  	var autocomplete = new google.maps.places.Autocomplete(input,opts);
+
+	$(".citydropdown").select2();
+
+	$('#weatherform').submit(function(){
+		var startDt=document.getElementById("startdate").value;
+		var endDt=document.getElementById("enddate").value;
+		var oneDay = 24*60*60*1000;
+
+		var diffDays = Math.round(Math.abs((new Date(startDt).getTime() - new Date(endDt).getTime())/(oneDay)));
+		if( (new Date(startDt).getTime() > new Date(endDt).getTime()))
+		{
+			//alert("Start date must be time before End date");
+			$('#erroralerts').html('* Start date must be time before end date');
+		    return false;
+		}
+
+		if( (diffDays > 9))
+		{
+			//alert("Start and end dates difference should not be more than 10 days!");
+			$('#erroralerts').html('* There should be exactly 10 days or less between start date and end date');
+		    return false;
+		}
+
+		if( (diffDays == 0))
+		{
+			//alert("Start and end dates difference should not be more than 10 days!");
+			$('#erroralerts').html('* Please select different dates!');
+		    return false;
+		}
+	});
+
+
+$('#obsv').click(function(){
+	var a = $('#obsTable').html();
+	$('#obsPage').html(a);
+});
+
+///////////////////////////////////UNIT SYSTEM/////////////////////////////////////////////
+$("input[name='units']").change(function(){
+    // Do something interesting here
+    var v =  $("input[name='units']:checked").val();
+    if(v == 'imperial'){
+    	$("#dewpt").val('dewpti');
+    	$("#pressure").val('pressurei');
+    	$("#temp").val('tempi');
+    	$("#wgust").val('wgusti');
+    	$("#wspd").val('wspdi');
+    	$("input[name='unitscale']").val('imperial');
+	} else{
+		$("#dewpt").val('dewptm');
+		$("#pressure").val('pressurem');
+		$("#temp").val('tempm');
+		$("#wgust").val('wgustm');
+		$("#wgust").val('wgusti');
+		$("#wspd").val('wspdm');
+		$("input[name='units']:checked").val();
+		$("input[name='unitscale']").val('metric');
+	}
+});
+///////////////////////////////////UNIT SYSTEM/////////////////////////////////////////////
+
+/////////////////*******************CHARTS********************/////////////////////////////
+	var x_axis = {{ x|safe }};
+	var y_axis = {{ y|safe }};
+
+	var arrayLength = y_axis.length;
+	var datalist = [];
+
+	for (var i = 0; i < arrayLength; i++) {
+		if(y_axis[i] !== '-9999')
+    		datalist.push({x : i, y : y_axis[i]});
+	}
+
+	console.log(datalist);
+
+	var data = {
+	  	series: [datalist]
+	};
+
+var options = {
+  axisX: {
+    type: Chartist.AutoScaleAxis
+  },
+  axisY: {
+    type: Chartist.AutoScaleAxis
+  },
+  plugins: [
+    Chartist.plugins.zoom({ onZoom: onZoom })
+  ]
+};
+
+var chart = Chartist.Line('.ct-chart', data, options);
+var resetFnc;
+function onZoom(chart, reset) {
+  resetFnc = reset;
+}
+
+$('#resetting').click(function(){
+  resetFnc && resetFnc();	
+});
+/////////////////*******************CHART1********************/////////////////////////////

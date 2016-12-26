@@ -28,7 +28,7 @@ def getReading(single_date,place,parameter,timeinterval):
 	json_string = f.read()
 	parsed_json = json.loads(json_string.decode())
 	if 'history' not in parsed_json:
-		return x , y
+		return x , y , timeinterval
 
 	#print("coming here")
 	observations = parsed_json['history']['observations']

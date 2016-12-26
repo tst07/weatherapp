@@ -69,11 +69,11 @@ def homepage(request):
 		unitscale = cd['unitscale']
 		for single_date in daterange(start_date, end_date):
 			x , y , timeinterval = getReading(single_date,place,parameter,timeinterval)
-			if not x or not y:
-				messages.info(request, 'No data found for this city. Try a different name of your city.')
-				break
 			x_axis = x_axis + x
 			y_axis = y_axis + y
+
+		if not x_axis or not y_axis:
+			messages.info(request, 'No data found for this city. Try a different name of your city.')
 
 		sdate = cd["start_date"]
 		edate = cd["end_date"]

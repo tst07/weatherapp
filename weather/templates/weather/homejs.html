@@ -4,6 +4,7 @@
 	  types: ['(cities)']
 	};
   	var autocomplete = new google.maps.places.Autocomplete(input,opts);
+  	re = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
 
 	$(".citydropdown").select2();
 
@@ -13,6 +14,12 @@
 		var oneDay = 24*60*60*1000;
 
 		var diffDays = Math.round(Math.abs((new Date(startDt).getTime() - new Date(endDt).getTime())/(oneDay)));
+
+		if(!startDt.match(re) && !endDt.match(re)) {
+    		$('#erroralerts').html('* Invalid date format. allowed format mm/dd/yyyy');
+        	return false;
+    	}
+
 		if( (new Date(startDt).getTime() > new Date(endDt).getTime()))
 		{
 			//alert("Start date must be time before End date");
